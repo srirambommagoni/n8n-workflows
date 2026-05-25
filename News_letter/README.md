@@ -72,13 +72,10 @@ The generated newsletter includes:
 
 # 📷 Workflow Preview
 
-You can add screenshots of the workflow here.
 
-Example:
 
-```md
 ![Workflow Screenshot](images/workflow.png)
-```
+
 
 ---
 
