@@ -102,7 +102,7 @@ Through these workflows, I aim to improve my understanding of:
 
 ## 👤 Author
 
-**[Sriram Goud Bommagoni]**
+**Sriram Goud Bommagoni**
 
 ---
 
