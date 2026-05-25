@@ -1,0 +1,246 @@
+{
+  "name": "Sanjaya - Daily News Highlights",
+  "nodes": [
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -256,
+        -480
+      ],
+      "id": "e7dd3803-131c-4455-bd1e-6d550ee32a0e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        -464
+      ],
+      "id": "69d71ad2-ad0b-4c29-98d4-54b70868bfba",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "chinnunani9346@gmail.com",
+        "subject": "Sanjaya Daily News Highlights",
+        "emailType": "text",
+        "message": "={{$json[\"text\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        -464
+      ],
+      "id": "0fbe6ab6-efc0-46a1-a3f0-d2e5e404ef17",
+      "name": "Send a message",
+      "webhookId": "836bddbd-e01c-4ce0-8c5a-213c4c3c063a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VTDsjVU9LFkdqwia",
+          "name": "Project Sanjaya"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional news summarizer. \n\nYou will be given a bunch of news articles. Try to summarize the news content into a simple readable Gmail ready newsletter content.\nThe formatting should be like as follows:\n\nNews Source Name (Only once for every source)\n------------------------------------------------------------------------------------------------\nHeadline(In uppercase),\nDate published,\nNews summary(Not too long)\nRead more : [Article/Source link]\n\n\nRepeat the above format for all of the news articles. \n\nBy PantoNews."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        192,
+        -464
+      ],
+      "id": "a20cbec1-0554-40ec-b735-bb17a2a29d9e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -464
+      ],
+      "id": "ee41bf98-b3cd-45b0-8f87-33ac3720a9e7",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        264,
+        -240
+      ],
+      "id": "8784732b-5d68-480f-a3d9-de3ff0d7a7a7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dDRnwFfBerLbxvzV",
+          "name": "Project Sanjaya"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.thehindu.com/sport/cricket/feeder/default.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        -368
+      ],
+      "id": "8be51199-1fd3-4699-8d49-ec2de41abc37",
+      "name": "The Hindu"
+    },
+    {
+      "parameters": {
+        "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
+        "options": {
+          "customFields": "",
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        -560
+      ],
+      "id": "11dddf7d-8f10-4f18-b907-778116c49601",
+      "name": "Nasa"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Nasa",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Hindu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Hindu": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Nasa": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "447620fc-df65-4c27-9e16-4e1a8815a7a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee72cd451005e93516bb72a8ced8d3d6d2104ab8b2fabbe56f6f7f80e8175d26"
+  },
+  "id": "OQbFat67exSI5poJ",
+  "tags": []
+}
