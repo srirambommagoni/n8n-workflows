@@ -1,0 +1,198 @@
+{
+  "name": "Project Sahadeva Your Autonomous Social Reply System",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30d3032e-e2eb-433b-9ac9-d300a64e1e71",
+              "name": "Reply",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        32
+      ],
+      "id": "962bf864-82ff-466e-961d-2d33ae495737",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=​{{ $('Gmail Trigger').item.json.text }}",
+        "message": "={{$json.Reply}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        32
+      ],
+      "id": "bc6ae060-d1c9-4af4-9076-c4fc7b73961e",
+      "name": "Create a draft",
+      "webhookId": "fb154f09-337c-4f7e-835c-70cd8ae75604",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VTDsjVU9LFkdqwia",
+          "name": "Project Sahadeva"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.Subject }} | Content: {{ $json.snippet }}\n",
+        "options": {
+          "systemMessage": "You are an intelligent, automated email assistant for Project Sahadeva. Your sole task is to directly draft a complete, ready-to-send reply to the incoming email. \n\nFollow these strict operational rules:\n1. NEVER offer options, choices, or templates (like Option 1, Option 2, Option 3). Generate exactly ONE perfect, final response draft.\n2. ALWAYS match the language of the incoming email. If the sender writes in English, reply in English. If they write in Telugu, reply in Telugu. \n3. NEVER introduce yourself or state \"I am Sahadeva, an AI assistant\" or mention that you are an AI. Write naturally as a human assistant acting on behalf of the user.\n4. If the email mentions recent local events, current conditions, or asks for real-time information (such as asking about the weather at your place), you MUST use the google_search tool to check current data/facts before drafting your response so your reply is accurate.\n5. Provide ONLY the final text of the email reply in your output. Do not include any conversational meta-text or commentary before or after the email draft.\n6. Include my name at the end of the reply and not Project Sahadeva. My name is \"Sriram Goud Bommagoni\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -144,
+        32
+      ],
+      "id": "916a7c16-5f27-4304-89e6-223876a3a289",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        272
+      ],
+      "id": "749c6a1f-1585-4354-8478-667e0ff416a8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dDRnwFfBerLbxvzV",
+          "name": "Project Sahadeva"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "test_session"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        272
+      ],
+      "id": "fbc58495-1e61-455f-bf20-e562ed90e751",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -368,
+        32
+      ],
+      "id": "5dc99dee-91e7-4490-9c47-66eef6f82158",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VTDsjVU9LFkdqwia",
+          "name": "Project Sahadeva"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f00d8619-56e1-40e2-acda-18601c882de5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee72cd451005e93516bb72a8ced8d3d6d2104ab8b2fabbe56f6f7f80e8175d26"
+  },
+  "id": "IWvSDvAp3dPrOmRA",
+  "tags": []
+}
